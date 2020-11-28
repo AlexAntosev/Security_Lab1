@@ -7,6 +7,8 @@
         public string DecryptedText { get; set; }
         
         public char Key { get; set; }
+        
+        public string RepeatingKey { get; set; }
 
         public override string ToString()
         {
