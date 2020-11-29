@@ -15,26 +15,8 @@ namespace Security_Lab1.Encoders
             } 
   
             return encryptedText; 
-        } 
+        }
         
-        public static string RepeatingKeyEncrypt(string text, string key) 
-        {
-            var encryptedText = ""; 
-            var textLength = text.Length; 
-  
-            var k = 0;
-            for (var i = 0; i < textLength; i++)
-            {
-                encryptedText += Convert.ToByte((char) (text[i] ^ key[k]));
-                
-                k++;
-                if (k == key.Length)
-                {
-                    k = 0;
-                }
-            } 
-  
-            return encryptedText; 
-        } 
+        public static string Decrypt(string text, char key) => Encrypt(text, key);
     }
 }

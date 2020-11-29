@@ -5,4 +5,16 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Compile Remove="Operations\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Operations\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Operations\**" />
+    </ItemGroup>
+
 </Project>

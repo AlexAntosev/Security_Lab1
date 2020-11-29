@@ -1,87 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using Security_Lab1.Common;
+using Security_Lab1.Converters;
+using Security_Lab1.Extensions;
+using Security_Lab1.Models;
+using Security_Lab1.Operators;
 
 namespace Security_Lab1.Decoders
 {
     public class RepeatingXorDecoder
     {
-        public static string AttackRepeatingXor(string text)
+        public static DecryptionResult Attack(string hexCipher)
         {
-            var keysize = 3;
-            var parts = new List<string>();
-
-            for (int i = 0; i < 3; i++)
-            {
-                var part = XorDecoder.Decrypt(SplitByInterval(text, 3, i));
-                parts.Add(part.DecryptedText);
-            }
-
-            var result = "";
-            for (int i = 0; i < text.Length / 3; i++)
-            {
-                result += parts[0][i];
-                result += parts[1][i];
-                result += parts[2][i];
-            }
-
-            return result;
-        }
-
-        public static string SplitByInterval(string text, int interval, int start)
-        {
-            var res = "";
-            for (int i = start; i < text.Length; i+=interval)
-            {
-                res += text[i];
-            }
-
-            return res;
-        }
-
-        // private static object FindKeyLength(string text, int minLength = 2, int maxLength = 30)
-        // {
-        //     var key = ScoreKeySize()
-        // }
-        //
-        // private static object ScoreKeySize(int possibleKeySize, string text)
-        // {
-        //     var sliceSize = 2 * possibleKeySize;
-        //     var measurement = text.Length / sliceSize + 1;
-        //
-        //     var score = 0;
-        //     for (int i = 0; i < measurement; i++)
-        //     {
-        //         var s = sliceSize;
-        //         var k = possibleKeySize;
-        //         var slice1 = 
-        //     }
-        // }
-        
-        public static int GetHammingDistance(string s, string t)
-        {
-            if (s.Length != t.Length)
-            {
-                throw new Exception("Strings must be equal length");
-            }
-
-            int distance =
-                s.ToCharArray()
-                    .Zip(t.ToCharArray(), (c1, c2) => new { c1, c2 })
-                    .Count(m => m.c1 != m.c2);
-
-            return distance;
-        }
-        
-        public static string FromHexToChars(string text)
-        {
-            var fromHex = "";
-            for (int i = 0; i < text.Length; i+=2)
-            {
-                fromHex += Convert.ToChar(Convert.ToInt32($"{text[i]}{text[i + 1]}", 16));
-            }
+            var bestKeySize = FindKeyLength(hexCipher);
+            byte[] cipherBytes = HexConverter.HexStringToBytes(hexCipher);
             
-            return fromHex;
+            var blocksOfKeySize = cipherBytes.CreateMatrix(bestKeySize);
+            
+            var transposedBlocks = blocksOfKeySize.Transpose();
+
+            var bruteForceResults = transposedBlocks
+                .Select(x => SingleByteXorAttacker.AttackHex(HexConverter.BytesToHexString(x)))
+                .ToList();
+
+            return Analyzer.AnalyzeResult(bruteForceResults, cipherBytes);
+        }
+        
+        public static int FindKeyLength(string cipher)
+        {
+            byte[] cipherText = HexConverter.HexStringToBytes(cipher);
+
+            var keySizeResults = new Dictionary<int, int>();
+
+            for (var keySize = 2; keySize <= 40; keySize++)
+            {
+                var hammingDistance = 0;
+                var numberOfHams = 0;
+
+                for (int i = 1; i < cipherText.Length / keySize; i++)
+                {
+                    var firstKeySizeBytes = cipherText.Skip(keySize * (i - 1)).Take(keySize).ToArray();
+                    var secondKeySizeBytes = cipherText.Skip(keySize * i).Take(keySize).ToArray();
+
+                    hammingDistance += firstKeySizeBytes.GetHammingDistance(secondKeySizeBytes);
+                    numberOfHams++;
+                }
+
+                var normalizedDistance = hammingDistance / numberOfHams / keySize;
+                keySizeResults.Add(keySize, normalizedDistance);
+            }
+
+            var orderedResults = keySizeResults.OrderBy(x => x.Value);
+            var bestKeySize = orderedResults.First().Key;
+
+            return bestKeySize;
         }
     }
 }
