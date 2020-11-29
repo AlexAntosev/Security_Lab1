@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Security_Lab1.Converters;
 using Security_Lab1.Models;
 using Security_Lab1.Operators;
 
@@ -10,64 +9,48 @@ namespace Security_Lab1.Common
 {
     public class Analyzer
     {
-        public static string AnalyzeKey(List<Dictionary<string, string>> bruteForceResults)
-        {
-            var fullKey = string.Empty;
-            
-            foreach (var result in bruteForceResults)
-            {
-                string key = null;
-                double currentHighestScore = 0;
-
-                foreach (var attempt in result)
-                {
-                    var rating = Analyzer.EnglishRating(attempt.Value);
-                    if (currentHighestScore <= rating)
-                    {
-                        key = attempt.Key;
-                        currentHighestScore = rating;
-                    }
-                }
-
-                fullKey += key;
-            }
-
-            return fullKey;
-        }
-        
         public static DecryptionResult AnalyzeResult(List<Dictionary<string, string>> bruteForceResults, byte[] cipherBytes)
         {
             var fullKey = AnalyzeKey(bruteForceResults);
 
             // Use key!
-            var expandedKey = Key.Expand(fullKey, HexConverter.BytesToHexString(cipherBytes));
-            var plainTextAsBytes = Xor.CompareByteArrays(cipherBytes, HexConverter.HexStringToBytes(expandedKey));
-            var plaintext = Encoding.UTF8.GetString(plainTextAsBytes);
-
-            return new DecryptionResult
-            {
-                RepeatingKey = fullKey,
-                DecryptedText = plaintext
-            };
-        }
-        
-        public static DecryptionResult AnalyzeSingleResult(List<Dictionary<string, string>> bruteForceResults, byte[] cipherBytes)
-        {
-            var fullKey = Convert.ToByte(Convert.ToInt32(AnalyzeKey(bruteForceResults)));
-
-            // Use key!
-            var expandedKey = Key.Expand(fullKey, HexConverter.BytesToHexString(cipherBytes));
+            var expandedKey = Key.Expand(fullKey, cipherBytes);
             var plainTextAsBytes = Xor.CompareByteArrays(cipherBytes, expandedKey);
             var plaintext = Encoding.UTF8.GetString(plainTextAsBytes);
 
             return new DecryptionResult
             {
-                Key = (char)fullKey,
+                RepeatingKey = Encoding.ASCII.GetString(fullKey),
                 DecryptedText = plaintext
             };
         }
         
-        public static double EnglishRating(string text)
+        private static byte[] AnalyzeKey(List<Dictionary<string, string>> bruteForceResults)
+        {
+            var fullKey = new byte[bruteForceResults.Count];
+
+            for (int i = 0; i < bruteForceResults.Count; i++)
+            {
+                byte key = 0;
+                double currentHighestScore = 0;
+
+                foreach (var attempt in bruteForceResults[i])
+                {
+                    var rating = EnglishRating(attempt.Value);
+                    if (currentHighestScore <= rating)
+                    {
+                        key = Convert.ToByte(attempt.Key);
+                        currentHighestScore = rating;
+                    }
+                }
+
+                fullKey[i] = key;
+            }
+
+            return fullKey;
+        }
+
+        private static double EnglishRating(string text)
         {
             var chars = text.ToUpper().GroupBy(c => c).Select(g => new {g.Key, Count = g.Count()});
 

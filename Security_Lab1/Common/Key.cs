@@ -14,13 +14,25 @@
             return expandedKey;
         }
         
-        public static byte[] Expand(byte key, string text)
+        public static byte[] Expand(byte key, byte[] text)
         {
             var expandedKey = new byte[text.Length];
 
             for (int i = 0; i < text.Length; i++)
             {
                 expandedKey[i] = key;
+            }
+
+            return expandedKey;
+        }
+        
+        public static byte[] Expand(byte[] key, byte[] text)
+        {
+            var expandedKey = new byte[text.Length];
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                    expandedKey[i] = key[i % key.Length];
             }
 
             return expandedKey;

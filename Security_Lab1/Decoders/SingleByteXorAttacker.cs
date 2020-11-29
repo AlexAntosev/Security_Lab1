@@ -13,31 +13,14 @@ namespace Security_Lab1.Decoders
 {
     public class SingleByteXorAttacker
     {
-        public static Dictionary<string, string> AttackHex(string cipher)
+        public static Dictionary<string, string> Attack(byte[] cipher)
         {
-            var outputs = new Dictionary<string, string>();
-            foreach (var key in Enumerable.Range(0, 127))
-            {
-                var keyAsHex = Convert.ToString(key, 16);
-                var expandedKey = Key.Expand(keyAsHex, cipher);
-                
-                var outputHex = Xor.CompareStrings(cipher, expandedKey);
-                var outputBytes = HexConverter.HexStringToBytes(outputHex);
-                outputs.Add(keyAsHex, Encoding.ASCII.GetString(outputBytes));
-            }
-
-            return outputs;
-        }
-        
-        public static Dictionary<string, string> AttackBytes(string cipher)
-        {
-            byte[] bytesCipher = Encoding.ASCII.GetBytes(cipher);
             var outputs = new Dictionary<string, string>();
             foreach (byte key in Enumerable.Range(0, 127))
             {
                 var expandedKey = Key.Expand(key, cipher);
                 
-                var outputBytes = Xor.CompareByteArrays(bytesCipher, expandedKey);
+                var outputBytes = Xor.CompareByteArrays(cipher, expandedKey);
                 outputs.Add(key.ToString(), Encoding.ASCII.GetString(outputBytes));
             }
 

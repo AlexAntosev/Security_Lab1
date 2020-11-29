@@ -12,47 +12,41 @@ namespace Security_Lab1.Decoders
 {
     public class RepeatingXorDecoder
     {
-        public static DecryptionResult Attack(string hexCipher)
+        public static List<Dictionary<string, string>> Attack(byte[] cipher)
         {
-            var bestKeySize = FindKeyLength(hexCipher);
-            byte[] cipherBytes = HexConverter.HexStringToBytes(hexCipher);
-            
-            var blocksOfKeySize = cipherBytes.CreateMatrix(bestKeySize);
-            
+            var bestKeySize = FindBestKeySize(cipher);
+            var blocksOfKeySize = cipher.CreateMatrix(bestKeySize);
             var transposedBlocks = blocksOfKeySize.Transpose();
 
             var bruteForceResults = transposedBlocks
-                .Select(x => SingleByteXorAttacker.AttackHex(HexConverter.BytesToHexString(x)))
+                .Select(x => SingleByteXorAttacker.Attack(x))
                 .ToList();
 
-            return Analyzer.AnalyzeResult(bruteForceResults, cipherBytes);
+            return bruteForceResults;
         }
         
-        public static int FindKeyLength(string cipher)
+        public static int FindBestKeySize(byte[] cipher)
         {
-            byte[] cipherText = HexConverter.HexStringToBytes(cipher);
-
-            var keySizeResults = new Dictionary<int, int>();
-
+            var keySizes = new Dictionary<int, int>();
             for (var keySize = 2; keySize <= 40; keySize++)
             {
                 var hammingDistance = 0;
                 var numberOfHams = 0;
 
-                for (int i = 1; i < cipherText.Length / keySize; i++)
+                for (int i = 1; i < cipher.Length / keySize; i++)
                 {
-                    var firstKeySizeBytes = cipherText.Skip(keySize * (i - 1)).Take(keySize).ToArray();
-                    var secondKeySizeBytes = cipherText.Skip(keySize * i).Take(keySize).ToArray();
+                    var firstKeySizeBytes = cipher.Skip(keySize * (i - 1)).Take(keySize).ToArray();
+                    var secondKeySizeBytes = cipher.Skip(keySize * i).Take(keySize).ToArray();
 
                     hammingDistance += firstKeySizeBytes.GetHammingDistance(secondKeySizeBytes);
                     numberOfHams++;
                 }
 
                 var normalizedDistance = hammingDistance / numberOfHams / keySize;
-                keySizeResults.Add(keySize, normalizedDistance);
+                keySizes.Add(keySize, normalizedDistance);
             }
 
-            var orderedResults = keySizeResults.OrderBy(x => x.Value);
+            var orderedResults = keySizes.OrderBy(x => x.Value);
             var bestKeySize = orderedResults.First().Key;
 
             return bestKeySize;

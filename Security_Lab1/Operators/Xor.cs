@@ -23,12 +23,12 @@ namespace Security_Lab1.Operators
         
         public static string CompareStrings(string x, string y)
         {
-            var xBytes = HexConverter.HexStringToBytes(x);
-            var yBytes = HexConverter.HexStringToBytes(y);
+            var xBytes = HexToBytesConverter.HexStringToBytesArray(x);
+            var yBytes = HexToBytesConverter.HexStringToBytesArray(y);
 
             var xorData = CompareByteArrays(xBytes, yBytes);
             
-            return HexConverter.BytesToHexString(xorData);
+            return HexToBytesConverter.BytesArrayToHexString(xorData);
         }
     }
 }
