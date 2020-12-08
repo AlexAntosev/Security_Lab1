@@ -9,7 +9,7 @@ namespace Security_Lab5.DataContext
             : base(contextOptions)
         {
             //Database.EnsureDeleted();
-            Database.EnsureCreated();
+            //Database.EnsureCreated();
         }
 
         public DbSet<User> Users { get; set; }

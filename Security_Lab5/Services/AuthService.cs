@@ -19,7 +19,7 @@ namespace Security_Lab5.Services
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                Email = userModel.Email,
+                Email = userModel.Username,
                 PasswordHash = userModel.Password,
                 PasswordSalt = "123"
             };
@@ -31,9 +31,9 @@ namespace Security_Lab5.Services
 
         public async Task<bool> Login(UserModel userModel)
         {
-            var userEntity =  await _userRepository.Get(userModel.Email);
+            var userEntity =  await _userRepository.Get(userModel.Username);
 
-            if (userEntity.PasswordHash == userModel.Password)
+            if (userEntity != null && userEntity.PasswordHash == userModel.Password)
             {
                 return true;
             }

@@ -18,9 +18,15 @@ namespace Security_Lab5.Controllers
             _authService = authService;
         }
         
+        [HttpGet]
+        public async Task Get()
+        {
+            return;
+        }
+        
         [HttpPost]
         [Route("register")]
-        public async Task<bool> Register(UserModel userModel)
+        public async Task<bool> Register([FromBody]UserModel userModel)
         {
             return await _authService.Register(userModel);
         }

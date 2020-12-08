@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Security_Lab5.Models;
 
 namespace Security_Lab5.DataContext
@@ -20,7 +21,7 @@ namespace Security_Lab5.DataContext
 
         public async Task<User> Get(string email)
         {
-            var entity = await _dbContext.Users.FindAsync(email);
+            var entity = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
             return entity;
         }
     }
