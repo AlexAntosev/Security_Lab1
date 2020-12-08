@@ -4,41 +4,38 @@ namespace Security_Lab3.Decryptors
 {
     public static class LcgDecryptor
     {
-        public static LcgParams AttackIncrement(long result, long previousResult, LcgParams lcgParams)
+        public static LcgParams AttackIncrement(long secondResult, long firstResult, LcgParams lcgParams)
         {
-            lcgParams.Increment = (result - previousResult * lcgParams.Multiplier) % lcgParams.Module;
+            lcgParams.Increment = (secondResult - firstResult * lcgParams.Multiplier) % lcgParams.Module;
 
             return lcgParams;
         }
         
-        public static LcgParams AttackMultiplier(long result, long previousResult, long prePreviousResult, LcgParams lcgParams)
+        public static LcgParams AttackMultiplier(long thirdResult, long secondResult, long firstResult, LcgParams lcgParams)
         {
-            lcgParams.Multiplier = (result - previousResult) *
-                ReverseMod(previousResult - prePreviousResult, lcgParams.Module) % lcgParams.Module;
+            lcgParams.Multiplier = (thirdResult - secondResult) *
+                RevertMod((secondResult - firstResult), lcgParams.Module) % lcgParams.Module;
 
-            return AttackIncrement(result, previousResult, lcgParams);
-        }
-
-        private static long ReverseMod(long b, long n)
-        {
-            var (g, x, res) = Reverse(b, n);
-            if (g == 1)
-            {
-                return x % n;
-            }
-
-            return res;
+            return AttackIncrement(thirdResult, secondResult, lcgParams);
         }
         
-        private static (long, long, long) Reverse(long a, long b)
+        private static long RevertMod(long number, long mod)
         {
-            if (a == 0)
+            if (mod == 1)
             {
-                return (b, 0, 1);
+                return 0;
             }
+            
+            var m0 = mod;
+            (long a, long b) = (1, 0);
 
-            var (g, x, y) = Reverse(b % a, a);
-            return (g, y - (b / a) * x, x);
+            while (number > 1)
+            {
+                var res = number / mod;
+                (number, mod) = (mod, number % mod);
+                (a, b) = (b, a - res * b);
+            }
+            return a < 0 ? a + m0 : a;
         }
     }
 }

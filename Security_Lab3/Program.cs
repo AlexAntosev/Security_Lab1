@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Security_Lab3.Decryptors;
+using Security_Lab3.Encryptors;
 using Security_Lab3.Models;
 using Security_Lab3.Services;
 
@@ -8,14 +9,18 @@ namespace Security_Lab3
 {
     class Program
     {
+        private const string AccountId = "171718";
+        
         static void Main(string[] args)
         {
             // Lcg
             var casinoService = new CasinoService();
             var results = new List<PlayResult>();
-            for (int i = 0; i < 3; i++)
+            var account = casinoService.CreateAccount(AccountId).Result;
+            
+            for (var i = 0; i < 3; i++)
             {
-                var playResult = casinoService.Play("171717").Result;
+                var playResult = casinoService.Play(AccountId, 17).Result;
                 results.Add(playResult);
             }
 
@@ -25,7 +30,10 @@ namespace Security_Lab3
                 results[0].RealNumber,
                 new LcgParams());
 
-            Console.ReadKey();
+            var result = LcgEncryptor.Next(results[2].RealNumber, lcgParams);
+            var successfulResult = casinoService.Play(AccountId, result).Result;
+
+            Console.WriteLine(successfulResult.Message);
         }
     }
 }

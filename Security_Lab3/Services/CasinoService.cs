@@ -23,13 +23,13 @@ namespace Security_Lab3.Services
             return account; 
         }
         
-        public async Task<PlayResult> Play(string id)
+        public async Task<PlayResult> Play(string id, long number)
         {
             var playResult = await _http.Get<PlayResult>(
                 CasinoUrls.PlayLcg,
                 ("id", id),
                 ("bet", 1),
-                ("number", 17));
+                ("number", number));
             
             return playResult; 
         }
