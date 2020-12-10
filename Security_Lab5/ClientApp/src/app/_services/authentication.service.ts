@@ -38,4 +38,12 @@ export class AuthenticationService {
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
   }
+
+  postCreditCard(username: string, creditCard: string){
+    return this.http.post<any>(`https://localhost:44365/sensitive`, { username, creditCard });
+  }
+
+  getCreditCard(username: string){
+    return this.http.get<string>(`https://localhost:44365/sensitive/${username}`);
+  }
 }

@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
-
 import { User } from '../_models';
-import { UserService, AuthenticationService } from '../_services';
+import { AuthenticationService, UserService } from '../_services';
+
 
 @Component({ templateUrl: 'home.component.html' })
 export class HomeComponent implements OnInit, OnDestroy {
@@ -11,7 +12,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   currentUserSubscription: Subscription;
   users: User[] = [];
 
+  creditcard: string;
+
+  cardForm: FormGroup;
+
   constructor(
+    private formBuilder: FormBuilder,
     private authenticationService: AuthenticationService,
     private userService: UserService
   ) {
@@ -21,8 +27,14 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.cardForm = this.formBuilder.group({
+      creditcard: ['', Validators.required],
+    });
+
     this.loadAllUsers();
   }
+
+  get f() { return this.cardForm.controls; }
 
   ngOnDestroy() {
     // unsubscribe to ensure no memory leaks
@@ -33,6 +45,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.userService.delete(id).pipe(first()).subscribe(() => {
       this.loadAllUsers()
     });
+  }
+
+  postCard(username: string) {
+    this.authenticationService.postCreditCard(username, this.f.creditcard.value)
+      .subscribe();
+  }
+
+  getCard(username: string) {
+    this.authenticationService.getCreditCard(username)
+      .subscribe(c => this.creditcard = c);
   }
 
   private loadAllUsers() {

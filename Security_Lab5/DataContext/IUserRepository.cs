@@ -8,5 +8,7 @@ namespace Security_Lab5.DataContext
         Task Add(User model);
 
         Task<User> Get(string email);
+
+        Task Update(User user);
     }
 }

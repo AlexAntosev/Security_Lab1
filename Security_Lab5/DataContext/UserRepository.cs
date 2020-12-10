@@ -24,5 +24,11 @@ namespace Security_Lab5.DataContext
             var entity = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
             return entity;
         }
+
+        public async Task Update(User user)
+        {
+            _dbContext.Users.Update(user);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

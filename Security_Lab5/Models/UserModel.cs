@@ -15,5 +15,7 @@ namespace Security_Lab5.Models
         public string LastName { get; set; }
         
         public string Token { get; set; }
+        
+        public string CreditCard { get; set; }
     }
 }

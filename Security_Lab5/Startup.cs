@@ -25,6 +25,8 @@ namespace Security_Lab5
         {
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IAuthService, AuthService>();
+            services.AddTransient<ISensitiveDataService, SensitiveDataService>();
+            services.AddSingleton<IKeyVault, KeyVault>();
             
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<ApplicationDataContext>(options => options.UseSqlServer(connectionString));
