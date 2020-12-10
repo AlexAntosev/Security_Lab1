@@ -10,12 +10,12 @@ namespace Security_Lab5.Services
     public class SensitiveDataService : ISensitiveDataService
     {
         private readonly IUserRepository _userRepository;
-        private readonly byte[] _key;
+        private readonly IKeyVault _keyVault;
 
         public SensitiveDataService(IUserRepository userRepository, IKeyVault keyVault)
         {
             _userRepository = userRepository;
-            _key = keyVault.Get();
+            _keyVault = keyVault;
         }
         public async Task Post(UserModel userModel, string creditCard)
         {
@@ -24,7 +24,8 @@ namespace Security_Lab5.Services
             if (user != null)
             {
                 var salt = PasswordEncryptor.CreateSalt(ChaCha20Poly1305.ChaCha20Poly1305.NonceSize);
-                var hashedCreditCard = PasswordEncryptor.EncryptSensitiveData(creditCard, salt, _key);
+                var key = _keyVault.Get();
+                var hashedCreditCard = PasswordEncryptor.EncryptSensitiveData(creditCard, salt, key);
 
                 user.CreditCardHash = hashedCreditCard;
                 user.CreditCardSalt = HexToBytesConverter.BytesArrayToHexString(salt);
@@ -40,7 +41,8 @@ namespace Security_Lab5.Services
             if (user != null)
             {
                 var salt = HexToBytesConverter.HexStringToBytesArray(user.CreditCardSalt);
-                var hashedCreditCard = PasswordEncryptor.DecryptSensitiveData(user.CreditCardHash, salt, _key);
+                var key = _keyVault.Get();
+                var hashedCreditCard = PasswordEncryptor.DecryptSensitiveData(user.CreditCardHash, salt, key);
 
                 var creditCard = HexToBytesConverter.HexStringToBytesArray(hashedCreditCard);
 

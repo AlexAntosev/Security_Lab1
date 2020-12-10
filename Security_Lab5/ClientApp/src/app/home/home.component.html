@@ -3,12 +3,15 @@
 <form [formGroup]="cardForm">
   <label for="creditcard">Add Credit card</label>
   <input type="text" formControlName="creditcard" class="form-control"/>
+  <h2></h2>
   <button class="btn btn-primary" (click)="postCard(currentUser.username)">
     Post
   </button>
   <h2></h2>
-  <label for="getcreditcard">Get Credit card</label>
+  <label for="getcreditcard">Get your Credit card</label>
+  <h2></h2>
   <label>{{creditcard}}</label>
+  <h2></h2>
   <button class="btn btn-primary" (click)="getCard(currentUser.username)">
     Get
   </button>

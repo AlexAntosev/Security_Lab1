@@ -1,4 +1,5 @@
-﻿using NSec.Cryptography;
+﻿using System.IO;
+using NSec.Cryptography;
 
 namespace Security_Lab5.Services
 {
@@ -6,20 +7,27 @@ namespace Security_Lab5.Services
     {
         public KeyVault()
         {
+                
+        }
+
+        public void CreateNewFile()
+        {
             using var key = Key.Create(
                 AeadAlgorithm.ChaCha20Poly1305, 
                 new KeyCreationParameters 
                 { 
                     ExportPolicy = KeyExportPolicies.AllowPlaintextExport 
                 });
-            _key = key.Export(KeyBlobFormat.NSecSymmetricKey);
+            var keyBlob = key.Export(KeyBlobFormat.NSecSymmetricKey);
+                
+            File.WriteAllBytes("key.nsec", keyBlob);
         }
-        
-        private byte[] _key;
 
         public byte[] Get()
         {
-            return _key;
+            var key = File.ReadAllBytes("key.nsec");
+            
+            return key;
         }
     }
 }
