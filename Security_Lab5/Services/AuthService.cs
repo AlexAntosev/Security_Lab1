@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Security_Lab5.Controllers;
 using Security_Lab5.DataContext;
 using Security_Lab5.Models;
 
@@ -9,6 +8,8 @@ namespace Security_Lab5.Services
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;
+        
+        private const int SaltLength = 16;
 
         public AuthService(IUserRepository userRepository)
         {
@@ -16,12 +17,15 @@ namespace Security_Lab5.Services
         }
         public async Task<bool> Register(UserModel userModel)
         {
+            var salt = PasswordEncryptor.CreateSalt(SaltLength);
+            var hashedPassword = PasswordEncryptor.HashPassword(userModel.Password, salt);
+            
             var user = new User
             {
                 Id = Guid.NewGuid(),
                 Email = userModel.Username,
-                PasswordHash = userModel.Password,
-                PasswordSalt = "123"
+                PasswordHash = hashedPassword,
+                PasswordSalt = HexToBytesConverter.BytesArrayToHexString(salt)
             };
             
             await _userRepository.Add(user);
@@ -29,16 +33,23 @@ namespace Security_Lab5.Services
             return true;
         }
 
-        public async Task<bool> Login(UserModel userModel)
+        public async Task<UserModel> Login(UserModel userModel)
         {
             var userEntity =  await _userRepository.Get(userModel.Username);
-
-            if (userEntity != null && userEntity.PasswordHash == userModel.Password)
+            
+            if (userEntity != null)
             {
-                return true;
+                var salt = HexToBytesConverter.HexStringToBytesArray(userEntity.PasswordSalt);
+                var hashedPassword = PasswordEncryptor.HashPassword(userModel.Password, salt);
+                if (hashedPassword == userEntity.PasswordHash)
+                {
+                    userModel.Token = "Fake-Token";
+                    
+                    return userModel;
+                }
             }
 
-            return false;
+            throw new Exception("Login failed");
         }
     }
 }

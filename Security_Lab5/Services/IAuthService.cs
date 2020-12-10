@@ -8,6 +8,6 @@ namespace Security_Lab5.Services
     {
         Task<bool> Register(UserModel userModel);
         
-        Task<bool> Login(UserModel userModel);
+        Task<UserModel> Login(UserModel userModel);
     }
 }

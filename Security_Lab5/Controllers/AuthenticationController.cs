@@ -33,9 +33,11 @@ namespace Security_Lab5.Controllers
         
         [HttpPost]
         [Route("login")]
-        public async Task<bool> Login(UserModel userModel)
+        public async Task<UserModel> Login(UserModel userModel)
         {
-            return await _authService.Login(userModel);
+            var user =  await _authService.Login(userModel);
+
+            return user;
         }
     }
 }
